@@ -13,7 +13,14 @@ library(rlang)
 library(maptools)
 library(ggspatial)
 library(sp)
+library(rgdal)
 
+
+install.packages("projections")
+library(projections)
+install.packages("crs")
+
+library(help="crs")
 ###########################################################################
 #Loading data
 ec_district <- st_read("./Shapefile/ec_district.shp")
@@ -68,12 +75,12 @@ gp <- ggplot() +
   scale_color_manual(values = c("A" = "green", "B" = "black"), 
                      labels = c("Local Municipalities", "District Municipalities"),
                      name = (NULL)) +
+  geom_sf_label(data =ec_district,aes(label = District_1))+
   ggtitle("The Eastern Cape") +
   annotation_north_arrow(which_north = "grid",location = "topleft")+
   theme(legend.position = c(0.9,0.1))+
   annotation_scale() 
 gp
-
 
 
 

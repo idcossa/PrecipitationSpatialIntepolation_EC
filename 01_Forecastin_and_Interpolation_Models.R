@@ -3,7 +3,7 @@ library(spdep)
 library(rcompanion) #-> matrixStats -> Histogram
 library(Metrics)
 
-#############
+###################################################################################
 #abline(h=1)) making trend ;line
 
 getwd()
@@ -19,8 +19,7 @@ precip.ts=ts(ec_preci$Precipitation..mm.day., start = min(1990), end = max(2021)
 class(precip.ts)
 View(precip.ts)
 
-
-######################################################################
+#################################################################################
 #____________ START: EXPLORATORY SPATIAL DATA ANALYSIS ___________________________
 
 #Plot Summary Stats
@@ -36,15 +35,17 @@ qqline(ec_preci$Precipitation..mm.day., col = "steelblue", lwd = 2)
 boxplot(ec_preci$Precipitation..mm.day.,
         main="Precipitation Box Plot",
         xlab="Months", ylab = "Precipitation (mm/day)", col = "green")
+plot(precip.ts, ylab="Precipitation (mm/day)", xlab="Date (Monthly)", main="Precipitation Variability", 
+     col="steelblue",lwd=2)
 
 #____________ END: EXPLORATORY SPATIAL DATA ANALYSIS _____________________________
 ###################################################################################
 ###################################################################################
 #_____________START: ARIMA MODELLING TEST 1________________________________________
 
-
 library(forecast)
 library(tseries)
+library(fpp2)
 ##Setting out the plot areas many maps in one sheet
 plot.new()
 frame()
@@ -70,21 +71,18 @@ abline(h=1)
 lag.plot(precip.ts, lags = 9, do.line = FALSE)
 lag.plot(whitenoise, lags = 9, do.line = FALSE)
 
-# !! The model is stationary but not at other significant level
-
+# !! The model is stationary other significant level
 
 ##### DIFFERENCING METHOD 2
 #Taking the first Diference to remove trend ` Change month to month`
 diferencing_preci <- diff(precip.ts)
 ##### END DIFFERENCING METHOD 2
 
-
 #Plot Time differenced 
 autoplot(diferencing_preci) + 
   ggtitle("Precipitation Time Variability Diffeneced") +
   ylab("Precipitation (mm/day") +
   xlab("Date")
-
 
 #The Series Differenced Appear Stationary, Investigate Seasonality: yEARS AND MONTHS
 ggseasonplot(diferencing_preci) + 
@@ -120,12 +118,9 @@ adf.test(diferencing_preci)
 #####################################################################################
 #_____________START: ARIMA MODELLING FORECASTING ______________________________________
 
-library(fpp2)
-
-
 #### USING BENCH MARK METHOD FORECAST - FITTING MODELS
 
-############## BENCHMARKING 1 SNB
+############## BENCHMARKING 1 SN-Benchmark
 
 # Using Seasonal Naive Method as Benchmark ~ Usind Differenced Data
 # y_t = y_{t-s} + e_t
@@ -148,7 +143,6 @@ fit_arima <- auto.arima(diferencing_preci, d=1, D=1, stepwise = FALSE,
                         approximation = FALSE, trace = TRUE) #before fitting take diffence of 1, D= seasonal Differnce, stepwise = FALSE by defauslt try to make it best try all methods and approximation 
 print(summary(fit_arima))  #Residual sd = 1.145
 checkresiduals(fit_arima) #Resut in Square sigma and can take it square root for standard deviation
-
 
 ############## FORECASTING MODEL FOR FORECAST USING BEST (USING BEST BENCHMARKING)
 ##Setting out the plot areas many maps in one sheet
@@ -392,7 +386,7 @@ points(perStationPrecipitation, pch = 20, col="blue", legend=TRUE)
 #Adding Legends
 #legend("topleft", lty=1,  col=c("black","darkgray"), c("District", "Station"))
 legend( x="topleft", 
-        legend=c("Point","Line"), 
+        legend=c("Stations","Districts"), 
         col=c("blue","black"), pch=c(19,NA), lwd=1, lty=c(NA,1), 
         merge=FALSE )
 
@@ -414,7 +408,7 @@ raster::scalebar(d = 100, # distance in km
 ###_____________For 2000__________
 TPS2000 <- Tps(x = as.matrix(PrecipitationInterpo[, c("Longitude", "Latitude")]), Y=PrecipitationInterpo$X2000, miles=FALSE)
 TPS2000_intr <- interpolate(extent_grid_raster, model=TPS2000)
-plot(TPS2000_intr, main = "TPS 2000 Precipitation")
+plot(TPS2000_intr, main = "TPS 2000 Precipitation",ylab="Latitude", xlab="Longitude")
 plot(ec_district,add=TRUE, size = 2, fill=NA,lwd=1)
 points(perStationPrecipitation, pch = 20, col="blue", legend=TRUE)
 
@@ -422,12 +416,11 @@ points(perStationPrecipitation, pch = 20, col="blue", legend=TRUE)
 #Adding Legends
 #legend("topleft", lty=1,  col=c("black","darkgray"), c("District", "Station"))
 legend( x="topleft", 
-        legend=c("Point","Line"), 
+        legend=c("Stations","Districts"), 
         col=c("blue","black"), pch=c(19,NA), lwd=1, lty=c(NA,1), 
         merge=FALSE )
 
 #North Arror
-library(maptools)
 north(plocation = "tl", which_north = "true", style = "style_1", fill = c("black","black") )
 
 #Scale Bar in tools
@@ -444,7 +437,7 @@ raster::scalebar(d = 100, # distance in km
 ###_____________For 2006__________
 TPS2006 <- Tps(x = as.matrix(PrecipitationInterpo[, c("Longitude", "Latitude")]), Y=PrecipitationInterpo$X2006, miles=FALSE)
 TPS2006_intr <- interpolate(extent_grid_raster, model=TPS2006)
-plot(TPS2006_intr, main = "TPS 2006 Precipitation")
+plot(TPS2006_intr, main = "TPS 2006 Precipitation",ylab="Latitude", xlab="Longitude")
 plot(ec_district,add=TRUE, size = 2, fill=NA,lwd=1)
 points(perStationPrecipitation, pch = 20, col="blue", legend=TRUE)
 
@@ -452,12 +445,11 @@ points(perStationPrecipitation, pch = 20, col="blue", legend=TRUE)
 #Adding Legends
 #legend("topleft", lty=1,  col=c("black","darkgray"), c("District", "Station"))
 legend( x="topleft", 
-        legend=c("Point","Line"), 
+        legend=c("Stations","Districts"), 
         col=c("blue","black"), pch=c(19,NA), lwd=1, lty=c(NA,1), 
         merge=FALSE )
 
 #North Arror
-library(maptools)
 north(plocation = "tl", which_north = "true", style = "style_1", fill = c("black","black") )
 
 #Scale Bar in tools
@@ -474,7 +466,7 @@ raster::scalebar(d = 100, # distance in km
 ###_____________For 2020__________
 TPS2020 <- Tps(x = as.matrix(PrecipitationInterpo[, c("Longitude", "Latitude")]), Y=PrecipitationInterpo$X2020, miles=FALSE)
 TPS2020_intr <- interpolate(extent_grid_raster, model=TPS2020)
-plot(TPS2020_intr, main = "TPS 2020 Precipitation")
+plot(TPS2020_intr, main = "TPS 2020 Precipitation",ylab="Latitude", xlab="Longitude")
 plot(ec_district,add=TRUE, size = 2, fill=NA,lwd=1)
 points(perStationPrecipitation, pch = 20, col="blue", legend=TRUE)
 
@@ -482,12 +474,11 @@ points(perStationPrecipitation, pch = 20, col="blue", legend=TRUE)
 #Adding Legends
 #legend("topleft", lty=1,  col=c("black","darkgray"), c("District", "Station"))
 legend( x="topleft", 
-        legend=c("Point","Line"), 
+        legend=c("Stations","Districts"), 
         col=c("blue","black"), pch=c(19,NA), lwd=1, lty=c(NA,1), 
         merge=FALSE )
 
 #North Arror
-library(maptools)
 north(plocation = "tl", which_north = "true", style = "style_1", fill = c("black","black") )
 
 #Scale Bar in tools
@@ -536,7 +527,7 @@ sqrt(mean((precipTesting$X2006 - precipTesting$InterpolaPrec2006)^2))
 sqrt(mean((precipTesting$X2020 - precipTesting$InterpolaPrec2020)^2))
 
 
-# Pearson Correlation Coeffiecien
+# Pearson Correlation Coeffieciency
 library("ggpubr")
 cor(precipTesting$X1995, precipTesting$InterpolaPrec1995, method = c("pearson", "kendall", "spearman"))
 cor(precipTesting$X2000, precipTesting$InterpolaPrec2000, method = c("pearson", "kendall", "spearman"))
